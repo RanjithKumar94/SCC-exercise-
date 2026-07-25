@@ -47,6 +47,9 @@ function addAircraftFromInput() {
 
     console.log("Aircraft added:", callsign);
 }
+document.getElementById("applyBtn").addEventListener("click", () => {
+    addAircraftFromInput();
+});
 const pauseBtn = document.getElementById("pauseBtn");
 const resumeBtn = document.getElementById("resumeBtn");
 
