@@ -4,7 +4,49 @@
 // ======================================
 let simulatorPaused = false;
 
+let aircraft = [];
 
+function addAircraftFromInput() {
+    const callsign = document.getElementById("callsign").value;
+    const type = document.getElementById("type").value;
+    const route = document.getElementById("route").value;
+    const entryRadial = parseInt(document.getElementById("entryRadial").value);
+    const distance = parseInt(document.getElementById("distance").value);
+    const heading = parseInt(document.getElementById("heading").value);
+    const level = parseInt(document.getElementById("level").value);
+    const speed = parseInt(document.getElementById("speed").value);
+
+    if(!callsign || !type || isNaN(entryRadial) || isNaN(distance)) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    aircraft.push({
+        callsign,
+        type,
+        route,
+        entryRadial,
+        distance,
+        x:0,
+        y:0,
+        labelAngle:0,
+        heading,
+        targetHeading: heading,
+        turnDirection: "SHORTEST",
+        level,
+        targetLevel: level,
+        verticalSpeed:0,
+        speed,
+        targetSpeed: speed,
+        arrivalPhase:false,
+        removeTimer:0,
+        landed:false,
+        active:false,
+        spawned:false
+    });
+
+    console.log("Aircraft added:", callsign);
+}
 const pauseBtn = document.getElementById("pauseBtn");
 const resumeBtn = document.getElementById("resumeBtn");
 
