@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATC Radar Simulator - User Input</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Simple style for container */
+  #container { display: flex; }
+  #radarContainer { position: relative; }
+  #controlPanel { margin-left: 20px; max-width: 300px; }
+</style>
+</head>
+<body>
+
+<div id="container">
+
+  <div id="radarContainer">
+    <canvas id="radar" width="900" height="900"></canvas>
+    <div id="clock">03:00:00</div>
+  </div>
+
+  <div id="controlPanel">
+    <h2>ATC Control Panel</h2>
+
+    <h3>Add Aircraft</h3>
+    <label>Callsign</label><br>
+    <input type="text" id="ac_callsign" placeholder="AIC916"><br><br>
+
+    <label>Type</label><br>
+    <input type="text" id="ac_type" placeholder="B747"><br><br>
+
+    <label>Route</label><br>
+    <input type="text" id="ac_route" placeholder="G473"><br><br>
+
+    <label>Entry Radial</label><br>
+    <input type="number" id="ac_radial" min="0" max="360" placeholder="300"><br><br>
+
+    <label>Distance (NM)</label><br>
+    <input type="number" id="ac_distance" min="0" max="60" placeholder="60"><br><br>
+
+    <label>Heading</label><br>
+    <input type="number" id="ac_heading" min="0" max="360" placeholder="120"><br><br>
+
+    <label>Level (FL)</label><br>
+    <input type="number" id="ac_level" min="0" max="400" placeholder="180"><br><br>
+
+    <label>Speed (KT)</label><br>
+    <input type="number" id="ac_speed" min="0" max="600" placeholder="300"><br><br>
+
+    <button id="addAircraft">Add Aircraft</button>
+  </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("radar");
+const ctx = canvas.getContext("2d");
+
+const RADAR_RADIUS = 380;
+let MAX_RANGE = 60;
+let PIXELS_PER_NM = RADAR_RADIUS / MAX_RANGE;
+
+const CENTER_X = canvas.width / 2;
+const CENTER_Y = canvas.height / 2;
+
+let aircraft = [];
+
+function nm(value){ return value * PIXELS_PER_NM; }
+
+function bearingToXY(bearing, distance){
+    const angle = (bearing - 90) * Math.PI / 180;
+    return {
+        x: CENTER_X + Math.cos(angle) * distance * PIXELS_PER_NM,
+        y: CENTER_Y + Math.sin(angle) * distance * PIXELS_PER_NM
+    };
+}
+
+function drawRadar(){
+    ctx.fillStyle = "#001100";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.strokeStyle = "#00aa44";
+    ctx.lineWidth = 1;
+    for(let i=10;i<=60;i+=10){
+        ctx.beginPath();
+        ctx.arc(CENTER_X, CENTER_Y, i*PIXELS_PER_NM, 0, Math.PI*2);
+        ctx.stroke();
+    }
+
+    // Draw aircraft
+    aircraft.forEach(ac=>{
+        const pos = bearingToXY(ac.heading, ac.distance);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 5, 0, Math.PI*2);
+        ctx.fillStyle = "#00FF00";
+        ctx.fill();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "12px Arial";
+        ctx.fillText(`${ac.callsign} FL${ac.level} ${ac.speed}KT`, pos.x+10, pos.y-10);
+    });
+
+    requestAnimationFrame(drawRadar);
+}
+
+// Add aircraft from form
+document.getElementById("addAircraft").onclick = ()=>{
+    const newAC = {
+        callsign: document.getElementById("ac_callsign").value || "UNK",
+        type: document.getElementById("ac_type").value || "UNK",
+        route: document.getElementById("ac_route").value || "UNK",
+        entryRadial: Number(document.getElementById("ac_radial").value) || 0,
+        distance: Number(document.getElementById("ac_distance").value) || 60,
+        heading: Number(document.getElementById("ac_heading").value) || 0,
+        level: Number(document.getElementById("ac_level").value) || 100,
+        speed: Number(document.getElementById("ac_speed").value) || 250
+    };
+    aircraft.push(newAC);
+};
+
+// Start radar
+drawRadar();
+</script>
+
+</body>
+</html>
